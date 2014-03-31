@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">WeMeet</string>
+    <string name="app_id">541910199255925</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="instructions">Effettuare il login tramite Facebook</string>
+    <string name="facebook_login">Login tramite Facebook</string>
+    <string name="logout">Logout applicazione</string>
+    <string name="mapButton">Mappa eventi</string>
+    <string name="apiCommonUrl">http://192.168.1.1/WeMeet/web/app_dev.php/api/v1</string>
+    <string name="title_activity_map_events">MapEventsActivity</string>
+    <string name="action_settings">Settings</string>
+
+</resources>
