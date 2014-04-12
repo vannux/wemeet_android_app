@@ -32,6 +32,7 @@ public class MainActivity extends Activity {
 
 	private Button buttonLoginLogout;
 	private Button buttonMap;
+	private Button buttonEventsList;
 	private Session.StatusCallback fbLoginstatusCallback = new SessionStatusCallback();
 	private static String apikey = null;
 	private static String auth_token = null;
@@ -48,23 +49,30 @@ public class MainActivity extends Activity {
 			public void onClick(View view) { onClickMapEvents(); }
 		});
 		buttonMap.setEnabled(false);
+		buttonEventsList = (Button)findViewById(R.id.eventsButton);
+		buttonEventsList.setOnClickListener(new OnClickListener() {
+			public void onClick(View view) { onClickEventsList(); }
+		});
+		buttonEventsList.setEnabled(false);
 		
-		Settings.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
+		if (apikey == null) {
+			Settings.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
 
-		Session session = Session.getActiveSession();
-		if (session == null) {
-			if (savedInstanceState != null) {
-				session = Session.restoreSession(this, null, fbLoginstatusCallback, savedInstanceState);
-			}
+			Session session = Session.getActiveSession();
 			if (session == null) {
-				session = new Session(this);
+				if (savedInstanceState != null) {
+					session = Session.restoreSession(this, null, fbLoginstatusCallback, savedInstanceState);
+				}
+				if (session == null) {
+					session = new Session(this);
+				}
+				Session.setActiveSession(session);
+				if (session.getState().equals(SessionState.CREATED_TOKEN_LOADED)) {
+					session.openForRead(new Session.OpenRequest(this).setCallback(fbLoginstatusCallback));
+				}
 			}
-			Session.setActiveSession(session);
-			if (session.getState().equals(SessionState.CREATED_TOKEN_LOADED)) {
-				session.openForRead(new Session.OpenRequest(this).setCallback(fbLoginstatusCallback));
-			}
+			
 		}
-
 		updateView();
 	}
 
@@ -76,28 +84,39 @@ public class MainActivity extends Activity {
 	}
 
 	private void updateView() {
-		Session session = Session.getActiveSession();
-		if (session.isOpened()) {
-			auth_token = session.getAccessToken();
-			buttonLoginLogout.setText(R.string.logout);
+		if (apikey == null) {
+			Session session = Session.getActiveSession();
+			if (session.isOpened()) {
+				auth_token = session.getAccessToken();
+				//Chiamata alla login tramite RESTAPI e memorizzazione apikey
+				if ( loginApiCall == null) {
+					loginApiCall = new LongRunningGetIO();
+					loginApiCall.execute();
+				}
+			} else {
+				apikey = null;
+				setState( false );
+			}
+		} else {
+			setState( true );
+		}
+	}
+	
+	private void setState(boolean logged) {
+		buttonLoginLogout.setText((logged ? R.string.logout : R.string.facebook_login));
+		if ( logged ) {
 			buttonLoginLogout.setOnClickListener(new OnClickListener() {
 				public void onClick(View view) { onClickLogout(); }
 			});
-			//Chiamata alla login tramite RESTAPI e memorizzazione apikey
-			if ( loginApiCall == null) {
-				loginApiCall = new LongRunningGetIO();
-				loginApiCall.execute();
-			}
 		} else {
-			buttonLoginLogout.setText(R.string.facebook_login);
-			apikey = null;
-			buttonMap.setEnabled(false);
 			buttonLoginLogout.setOnClickListener(new OnClickListener() {
 				public void onClick(View view) { onClickLogin(); }
 			});
 		}
+		buttonMap.setEnabled(logged);
+		buttonEventsList.setEnabled(logged);
 	}
-
+	
 	private void onClickLogin() {
 		Session session = Session.getActiveSession();
 		if (!session.isOpened() && !session.isClosed()) {
@@ -113,10 +132,12 @@ public class MainActivity extends Activity {
 		.onActivityResult(this, requestCode, resultCode, data);
 	}
 	private void onClickLogout() {
+		apikey = null;
 		Session session = Session.getActiveSession();
 		if (!session.isClosed()) {
 			session.closeAndClearTokenInformation();
 		}
+		updateView();
 	}
 
 	private class SessionStatusCallback implements Session.StatusCallback {
@@ -130,11 +151,7 @@ public class MainActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.logout:
-			Session session = Session.getActiveSession();
-			if (!session.isClosed()) {
-				session.closeAndClearTokenInformation();
-			}
-			updateView();
+			onClickLogout();
 			return true;
 		default:
 			return super.onContextItemSelected(item);
@@ -175,7 +192,7 @@ public class MainActivity extends Activity {
 				try {
 					JSONObject jObject = new JSONObject(results);
 					apikey = jObject.getString("apikey");
-					buttonMap.setEnabled(true);
+					setState( true );
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
@@ -185,6 +202,12 @@ public class MainActivity extends Activity {
 	
 	private void onClickMapEvents() {
 		Intent mapEventIntent = new Intent(getApplicationContext(), MapEventsActivity.class); /** Class name here */
+		mapEventIntent.putExtra("apikey", apikey);
+		startActivity( mapEventIntent );
+	}
+	
+	private void onClickEventsList() {
+		Intent mapEventIntent = new Intent(getApplicationContext(), EventsListActivity.class); /** Class name here */
 		mapEventIntent.putExtra("apikey", apikey);
 		startActivity( mapEventIntent );
 	}

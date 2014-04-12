@@ -1,17 +1,40 @@
 package com.vannux.wemeet;
 
+import java.io.IOException;
+import java.util.List;
+
+
+
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NavUtils;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.os.Build;
 
 public class MapEventsActivity extends FragmentActivity {
 
-	private String apikey = null; 
+	private String apikey = null;
+	private Button buttonSearch;
+	private EditText fldLocationSearch;
+	private GoogleMap map;
+	
+	@SuppressLint("NewApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -21,6 +44,17 @@ public class MapEventsActivity extends FragmentActivity {
 		Intent i = getIntent();
 		apikey = i.getStringExtra("apikey");
 		System.out.println(apikey);
+		buttonSearch = (Button)findViewById(R.id.buttonSearch);
+		buttonSearch.setOnClickListener(new OnClickListener() {
+			public void onClick(View view) { try {
+				onClickButtonSearch();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} }
+		});
+		fldLocationSearch = (EditText) findViewById(R.id.fldLocationSearch);
+		map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
 	}
 
 	/**
@@ -56,5 +90,14 @@ public class MapEventsActivity extends FragmentActivity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
-
+	
+	private void onClickButtonSearch() throws IOException {
+		Geocoder geocoder = new Geocoder(this);
+		List<Address> addresses = geocoder.getFromLocationName(fldLocationSearch.getText().toString(), 5);
+		if ( addresses.size() > 0 ) {
+			Address address = addresses.get(0);
+			
+			map.moveCamera( CameraUpdateFactory.newLatLngZoom(new LatLng(address.getLatitude(), address.getLongitude()), map.getCameraPosition().zoom) );
+		}
+	}
 }
