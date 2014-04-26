@@ -9,29 +9,29 @@
     tools:context=".EditEventActivity" >
 
     <EditText
-        android:id="@+id/fldMultiDescription"
+        android:id="@+id/fldMultiEventDescription"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/fldName"
-        android:layout_below="@+id/fldName"
+        android:layout_alignLeft="@+id/fldEventName"
+        android:layout_below="@+id/fldEventName"
         android:layout_marginTop="23dp"
         android:ems="10"
         android:inputType="textMultiLine"
         android:text="description" />
 
     <EditText
-        android:id="@+id/fldDate"
+        android:id="@+id/fldEventDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/fldMultiDescription"
-        android:layout_below="@+id/fldMultiDescription"
+        android:layout_alignLeft="@+id/fldMultiEventDescription"
+        android:layout_below="@+id/fldMultiEventDescription"
         android:layout_marginTop="18dp"
         android:ems="10"
         android:inputType="date"
         android:text="date" />
 
     <EditText
-        android:id="@+id/fldCity"
+        android:id="@+id/fldEventCity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
@@ -43,26 +43,26 @@
     </EditText>
 
     <EditText
-        android:id="@+id/fldName"
+        android:id="@+id/fldEventName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/fldCity"
+        android:layout_alignLeft="@+id/fldEventCity"
         android:layout_alignParentTop="true"
         android:layout_marginTop="18dp"
         android:ems="10"
-        android:text="name" />
+        android:text="event name" />
 
     <AutoCompleteTextView
         android:id="@+id/fldLocationSearch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/fldCity"
-        android:layout_below="@+id/fldCity"
+        android:layout_alignLeft="@+id/fldEventCity"
+        android:layout_below="@+id/fldEventCity"
         android:layout_marginTop="33dp"
         android:ems="10" />
 
     <CheckBox
-        android:id="@+id/chkPublic"
+        android:id="@+id/chkEventPublic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/fldLocationSearch"
@@ -71,12 +71,12 @@
         android:text="Evento pubblico" />
 
     <Button
-        android:id="@+id/btnCreaEvento"
+        android:id="@+id/btnOk"
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignRight="@+id/chkPublic"
-        android:layout_below="@+id/chkPublic"
+        android:layout_alignRight="@+id/chkEventPublic"
+        android:layout_below="@+id/chkEventPublic"
         android:layout_marginRight="17dp"
         android:layout_marginTop="17dp"
         android:text="OK" />

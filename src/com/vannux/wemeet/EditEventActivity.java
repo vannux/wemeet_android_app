@@ -7,11 +7,17 @@ import java.util.List;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.json.*;
 
@@ -40,7 +46,14 @@ public class EditEventActivity extends Activity {
 	private List<Address> resultList;
 	private double longitude;
 	private double latitude;
-	private Button btnCreaEvento;
+	private Button btnOk;
+	private LongRunningGetIO okApiCall = null;
+	private EditText fldEventName;
+	private EditText fldMultiEventDescription;
+	private EditText fldEventDate;
+	private EditText fldEventCity;
+	private EditText fldLocationSearch;
+	private CheckBox chkEventPublic;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -51,10 +64,17 @@ public class EditEventActivity extends Activity {
 		Intent i = getIntent();
 		apikey = i.getStringExtra("apikey");
 		
-		btnCreaEvento = (Button)findViewById(R.id.btnCreaEvento);
-		btnCreaEvento.setOnClickListener(new OnClickListener() {
-			public void onClick(View view) { onClickCreaEvento(); }
+		btnOk = (Button)findViewById(R.id.btnOk);
+		btnOk.setOnClickListener(new OnClickListener() {
+			public void onClick(View view) { onClickOk(); }
 		});
+		
+		fldEventName = (EditText) findViewById(R.id.fldEventName);
+		fldMultiEventDescription = (EditText) findViewById(R.id.fldMultiEventDescription);
+		fldEventDate = (EditText) findViewById(R.id.fldEventDate);
+		fldEventCity = (EditText) findViewById(R.id.fldEventCity);
+		fldLocationSearch = (EditText) findViewById(R.id.fldLocationSearch);
+		chkEventPublic = (CheckBox) findViewById(R.id.chkEventPublic);
 		
 		AutoCompleteTextView autoCompView = (AutoCompleteTextView) findViewById(R.id.fldLocationSearch);
 	    autoCompView.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.list_item));
@@ -169,8 +189,9 @@ public class EditEventActivity extends Activity {
 	    }
 	}
 	
-	private void onClickCreaEvento() {
-		
+	private void onClickOk() {
+		okApiCall = new LongRunningGetIO();
+		okApiCall.execute();
 	}
 	
 	private class LongRunningGetIO extends AsyncTask <Void, Void, String> {
@@ -189,11 +210,35 @@ public class EditEventActivity extends Activity {
 		@Override
 		protected String doInBackground(Void... params) {
 			HttpClient httpClient = new DefaultHttpClient();
-			HttpContext localContext = new BasicHttpContext();
-			HttpPut httpPut = new HttpPut();
+			//HttpContext localContext = new BasicHttpContext();
+			HttpPut httpPut = new HttpPut( getResources().getString(R.string.apiCommonUrl) + "/parties/" + apikey);
+			//httpPut.addHeader("Content-Type", "application/json");
+			httpPut.addHeader("Accept", "application/json");
+			
 			String text = null;
 			try {
-				HttpResponse response = httpClient.execute(httpPut, localContext);
+				// Add your data
+				JSONObject jsonObj = new JSONObject();
+			    jsonObj.put("id", "");
+			    jsonObj.put("name", fldEventName.getText().toString());
+			    jsonObj.put("description", fldMultiEventDescription.getText().toString());
+			    jsonObj.put("eventdate", fldEventDate.getText().toString());
+			    jsonObj.put("city", fldEventCity.getText().toString());
+			    jsonObj.put("location", fldLocationSearch.getText().toString());
+			    jsonObj.put("geolat", Double.toString(latitude));
+			    jsonObj.put("geolon", Double.toString(longitude));
+			    jsonObj.put("public", (chkEventPublic.isChecked() ? "Y" : "N"));
+
+			    
+			    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
+                nameValuePairs.add(new BasicNameValuePair("jsonPayload", jsonObj.toString()));
+                httpPut.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+                
+			    
+			    //StringEntity se = new StringEntity(jsonObj.toString());
+			    //se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+			    //httpPut.setEntity(se);
+				HttpResponse response = httpClient.execute(httpPut);
 				HttpEntity entity = response.getEntity();
 				text = getASCIIContentFromEntity(entity);
 			} catch (Exception e) {
