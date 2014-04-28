@@ -1,17 +1,42 @@
 package com.vannux.wemeet;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.support.v4.app.NavUtils;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.os.Build;
 
+import com.vannux.wemeet.entities.*;
+
 public class EventsListActivity extends Activity {
 
-	private String apikey = null; 
+	private String apikey = null;
+	private ListView listEvents = null;
+	private ArrayAdapter<Event> la = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +46,15 @@ public class EventsListActivity extends Activity {
 		setupActionBar();
 		Intent i = getIntent();
 		apikey = i.getStringExtra("apikey");
+		listEvents = (ListView) findViewById(R.id.listEvents);
+		la = new ArrayAdapter<Event>(this, R.layout.simplerow);
+		listEvents.setAdapter( la );
+		//Carico Lista Eventi
+		loadEvents();
+	}
+	
+	private void loadEvents() {
+		new LongRunningGetIO().execute();
 	}
 
 	/**
@@ -64,4 +98,64 @@ public class EventsListActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 
+	private class LongRunningGetIO extends AsyncTask <Void, Void, String> {
+		protected String getASCIIContentFromEntity(HttpEntity entity) throws IllegalStateException, IOException {
+			InputStream in = entity.getContent();
+			StringBuffer out = new StringBuffer();
+			int n = 1;
+			while (n>0) {
+				byte[] b = new byte[4096];
+				n =  in.read(b);
+				if (n>0) out.append(new String(b, 0, n));
+			}
+			return out.toString();
+		}
+
+		@Override
+		protected String doInBackground(Void... params) {
+			HttpClient httpClient = new DefaultHttpClient();
+			HttpContext localContext = new BasicHttpContext();
+			HttpGet httpGet = new HttpGet( getResources().getString(R.string.apiCommonUrl) + "/parties/" +
+					apikey + "/all");
+			String text = null;
+			try {
+				HttpResponse response = httpClient.execute(httpGet, localContext);
+				HttpEntity entity = response.getEntity();
+				text = getASCIIContentFromEntity(entity);
+			} catch (Exception e) {
+				return e.getLocalizedMessage();
+			}
+			return text;
+		}
+
+		protected void onPostExecute(String results) {
+			if (results!=null) {
+				try {
+					JSONArray jsonarr = new JSONArray(results);
+					DateFormat m_ISO8601Local = new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);
+					for(int i = 0; i < jsonarr.length(); i++){
+						Event event = new Event();
+						JSONObject jObject = jsonarr.getJSONObject(i);
+						event.setId(jObject.getLong("id"));
+						event.setCreationdate(m_ISO8601Local.parse(jObject.getString("creationdate")));
+						event.setEventdate(m_ISO8601Local.parse(jObject.getString("eventdate")));
+						event.setIsPublic(jObject.getString("public"));
+						event.setName(jObject.getString("name"));
+						event.setCity(jObject.getString("city"));
+						event.setGeolat(jObject.getDouble("geolat"));
+						event.setGeolon(jObject.getDouble("geolon"));
+						event.setLocation(jObject.getString("location"));
+						//event.setCreatedby(jObject.getLong("createdby"));
+						la.add(event);
+					}
+					la.notifyDataSetChanged();
+				} catch (JSONException e) {
+					e.printStackTrace();
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 }

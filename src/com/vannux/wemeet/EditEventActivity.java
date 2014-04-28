@@ -2,6 +2,7 @@ package com.vannux.wemeet;
 
 import java.io.*;
 import java.net.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -217,12 +218,14 @@ public class EditEventActivity extends Activity {
 			
 			String text = null;
 			try {
+				SimpleDateFormat inputDate = new SimpleDateFormat("dd/MM/yyyy");
+				SimpleDateFormat outputDate = new SimpleDateFormat("MM/dd/yyyy");
 				// Add your data
 				JSONObject jsonObj = new JSONObject();
 			    jsonObj.put("id", "");
 			    jsonObj.put("name", fldEventName.getText().toString());
 			    jsonObj.put("description", fldMultiEventDescription.getText().toString());
-			    jsonObj.put("eventdate", fldEventDate.getText().toString());
+			    jsonObj.put("eventdate", outputDate.format(inputDate.parse(fldEventDate.getText().toString())));
 			    jsonObj.put("city", fldEventCity.getText().toString());
 			    jsonObj.put("location", fldLocationSearch.getText().toString());
 			    jsonObj.put("geolat", Double.toString(latitude));
