@@ -23,6 +23,9 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.support.v4.app.NavUtils;
@@ -49,6 +52,18 @@ public class EventsListActivity extends Activity {
 		listEvents = (ListView) findViewById(R.id.listEvents);
 		la = new ArrayAdapter<Event>(this, R.layout.simplerow);
 		listEvents.setAdapter( la );
+		listEvents.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int position,
+					long arg3) {
+				Event event = (Event) listEvents.getItemAtPosition(position);
+				Intent editEventIntent = new Intent(getApplicationContext(), EditEventActivity.class); /** Class name here */
+				editEventIntent.putExtra("eventId", event.getId());
+				editEventIntent.putExtra("apikey", apikey);
+				startActivity( editEventIntent );
+			}
+		});
 		//Carico Lista Eventi
 		loadEvents();
 	}

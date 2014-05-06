@@ -20,17 +20,6 @@
         android:text="description" />
 
     <EditText
-        android:id="@+id/fldEventDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/fldMultiEventDescription"
-        android:layout_below="@+id/fldMultiEventDescription"
-        android:layout_marginTop="18dp"
-        android:ems="10"
-        android:inputType="date"
-        android:text="date" />
-
-    <EditText
         android:id="@+id/fldEventCity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -80,5 +69,47 @@
         android:layout_marginRight="17dp"
         android:layout_marginTop="17dp"
         android:text="OK" />
+
+    <EditText
+        android:id="@+id/fldEventDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/fldEventCity"
+        android:layout_alignRight="@+id/btnOk"
+        android:layout_marginBottom="18dp"
+        android:layout_toRightOf="@+id/btnDatePicker"
+        android:ems="10"
+        android:inputType="date"
+        android:text="date" />
+
+    <Button
+        android:id="@+id/btnDatePicker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/fldEventDate"
+        android:layout_alignBottom="@+id/fldEventDate"
+        android:layout_toLeftOf="@+id/fldEventCity"
+        android:onClick="showDatePickerDialog"
+        android:text="D" />
+
+    <EditText
+        android:id="@+id/fldEventTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/btnDatePicker"
+        android:layout_alignRight="@+id/fldEventCity"
+        android:layout_toRightOf="@+id/fldEventDate"
+        android:ems="10"
+        android:inputType="date"
+        android:text="time" />
+
+    <Button
+        android:id="@+id/btnTimePicker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/fldEventTime"
+        android:layout_toRightOf="@+id/fldEventTime"
+        android:onClick="showTimePickerDialog"
+        android:text="T" />
 
 </RelativeLayout>

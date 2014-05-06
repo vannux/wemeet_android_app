@@ -21,6 +21,7 @@ import com.facebook.Settings;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -91,6 +92,8 @@ public class MainActivity extends Activity {
 				//Chiamata alla login tramite RESTAPI e memorizzazione apikey
 				if ( loginApiCall == null) {
 					loginApiCall = new LongRunningGetIO();
+				}
+				if (loginApiCall.getStatus() != AsyncTask.Status.RUNNING) {
 					loginApiCall.execute();
 				}
 			} else {
@@ -158,6 +161,17 @@ public class MainActivity extends Activity {
 		}
 	}
 	private class LongRunningGetIO extends AsyncTask <Void, Void, String> {
+		
+		private ProgressDialog dialog = new ProgressDialog(MainActivity.this);
+		
+		/** progress dialog to show user that the backup is processing. */
+	    /** application context. */
+	    @Override
+	    protected void onPreExecute() {
+	        this.dialog.setMessage("Checking facebook login");
+	        this.dialog.show();
+	    }
+	    
 		protected String getASCIIContentFromEntity(HttpEntity entity) throws IllegalStateException, IOException {
 			InputStream in = entity.getContent();
 			StringBuffer out = new StringBuffer();
@@ -197,6 +211,9 @@ public class MainActivity extends Activity {
 					e.printStackTrace();
 				}
 			}
+			if (dialog.isShowing()) {
+	            dialog.dismiss();
+	        }
 		}
 	}
 	
